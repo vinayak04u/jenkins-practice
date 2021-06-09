@@ -1,0 +1,94 @@
+ARTH - Task 23 👨🏻‍💻 
+
+Task Description 📄
+
+📌 Automate Kubernetes Cluster Using Ansible
+
+🔅 Launch ec2-instances on AWS Cloud eg. for master and slave.
+
+🔅 Create roles that will configure master node and slave node seperately.
+
+🔅 Launch a wordpress and mysql database connected to it in the respectine slaves. 
+
+🔅 Expose the wordpress pod and client able hit the wordpress ip with its respective port.
+
+▪️ Task could be done individually or in Team.
+
+📍Below are the hashtags you have to use while posting your task
+#vimaldaga #righteducation #educationredefine #rightmentor #worldrecordholder #linuxworld #makingindiafutureready #righeducation #arthbylw #k8s #aws #ansible #automation #cluster #kubernetes #multinode #kubectl #kubeadm #kubelet 
+
+📥 Submission form : http://bit.ly/arth-task-23
+
+Thanks and Regards
+Team ARTH ✨
+
+<--------------------------------------------------------------------------------------------------------->
+
+configure master
+
+1) Launch Instance (tag name:- master)
+2) First We nee the docker install on the master node
+3) Then we have to configure yum k8s.repo 
+ 	[kubernetes]
+	name=Kubernetes
+	baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-\$basearch
+	enabled=1
+	gpgcheck=1
+	repo_gpgcheck=1
+	gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+	exclude=kubelet kubeadm kubectl
+4) Then download package (yum install kubeadm)
+5) kubeadm config images pull
+6) change cgroups driver to systemd
+	create file /etc/docker/daemon.json
+	{
+		"exec-opts" : ["native.cgroupsdriver = systemd"]
+	}
+7) download yum install ip-route -y
+8) Create file /etc/sysctl.d/k8s.conf
+	net.bridge.bridge-nf-call-ip6tables = 1
+	net.bridge.bridge-nf-call-iptables = 1
+9) sudo sysctl --system // RUN THIS COMMAND
+10) kubeadm init --pod-network-cidr=10.240.0.0/16  --ignore-preflight-check-error=NumCpu --ignore-preflight-check-error=Mem
+11) Start kubelet 
+12) now we have to create /root/.kube/ folder
+13) copy the /etc/kubernetes/admin.conf to $HOME/.kube/config
+14) now we have to give permission // sudo -chown $(id -u):$(id -g) $HOME/.kube/config
+15) Now we have to run flannel as this work as dhcp and router for the node 
+	kubectl apply  -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+16) change the content of the /var/run/flannel/subnet.env for this follow this step
+kubectl edit configmap kube-flannel.cfg -n kube-system
+	change the network range that we given while joining node 
+	and then delete the pod  having label app=flannel (kubectl delete po -l app=flannel -n kube-system)
+done !!!!!
+
+<------------------------------------------------------------------------------------------------------------------------------->
+
+configure worker node
+
+1) Lauch instance
+2) Download the Docker 
+3) Then we have to configure yum k8s.repo 
+ 	[kubernetes]
+	name=Kubernetes
+	baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-\$basearch
+	enabled=1
+	gpgcheck=1
+	repo_gpgcheck=1
+	gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+	exclude=kubelet kubeadm kubectl
+4) Then download package (yum install kubeadm)
+5) change cgroups driver to systemd
+	create file /etc/docker/daemon.json
+	{
+		"exec-opts" : ["native.cgroupsdriver = systemd"]
+	}
+6) Download yum install ip-route -y
+7) Create file /etc/sysctl.d/k8s.conf
+	net.bridge.bridge-nf-call-ip6tables = 1
+	net.bridge.bridge-nf-call-iptables = 1
+8) sudo sysctl --system // RUN THIS COMMAND
+9) Run Join related command  // we get this command form the master by running this command  kubeadb token create --print-join-command
+
+
+
